@@ -5,6 +5,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -17,5 +18,9 @@ func main() {
 		fmt.Fprintf(w, "Hi")
 	})
 
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
