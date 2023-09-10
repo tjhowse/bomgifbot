@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"os"
 
 	"github.com/mattn/go-mastodon"
@@ -42,4 +43,10 @@ func (m *Mastodon) GetMyStatuses(n int64) ([]*mastodon.Status, error) {
 			Limit: n,
 		})
 	}
+}
+
+// Uploads an image to the server and returns the URL
+func (m *Mastodon) UploadImage(filename string) (string, error) {
+	slog.Error("Unimplemented")
+	return "", nil
 }
