@@ -12,6 +12,7 @@ primary_region = "syd"
 
 [env]
   PORT = "8081"
+  MASTODON_SERVER = "https://howse.social"
 
 [http_service]
   internal_port = 8081
