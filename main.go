@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color/palette"
 	"image/draw"
 	"image/gif"
 	"log/slog"
@@ -69,29 +70,66 @@ func downloadImageFTP(url *url.URL, img *image.Image) error {
 	return nil
 }
 
-func writeImageToFile(img image.Image, filename string) error {
+type myGIF struct {
+	gif.GIF
+	frameDelay    int64
+	frameCount    int64
+	maxFrameCount int64
+}
+
+func initMyGIF(maxFrameCount int64, frameDelay int64) *myGIF {
+	g := myGIF{}
+	g.Image = make([]*image.Paletted, 0)
+	g.Delay = make([]int, 0)
+	g.frameCount = 0
+	g.frameDelay = frameDelay
+	g.maxFrameCount = maxFrameCount
+	return &g
+}
+
+// This function writes a the first frame of the gif to disk
+func (g *myGIF) writeFirstFrameToFile(filename string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return gif.Encode(f, img, nil)
+	options := gif.Options{}
+	options.NumColors = 256
+
+	return gif.Encode(f, g.Image[0], &options)
+}
+
+// This function writes an animated gif to disk.
+func (g *myGIF) writeToFile(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return gif.EncodeAll(f, &g.GIF)
 }
 
 // This inserts the provide image into the first frame of the gif,
 // and shifts all the other frames down one.
-func prependImageToGif(img *image.Image, gif *gif.GIF) error {
+func (g *myGIF) prependImage(img *image.Image) error {
+	if g.frameCount < g.maxFrameCount {
+		g.frameCount++
+		g.Image = append(g.Image, nil)
+		g.Delay = append(g.Delay, int(g.frameDelay))
+	}
+	slog.Info("Prepended image, up to frame " + fmt.Sprintf("%d", g.frameCount))
 	// Shift all the frames down one.
-	for i := len(gif.Image) - 1; i > 0; i-- {
-		gif.Image[i] = gif.Image[i-1]
-		gif.Delay[i] = gif.Delay[i-1]
+	for i := len(g.Image) - 1; i > 0; i-- {
+		g.Image[i] = g.Image[i-1]
+		g.Delay[i] = g.Delay[i-1]
 	}
 	// Palettise the image.Image into a image.Paletted
-	palettedImage := image.NewPaletted((*img).Bounds(), nil)
+	palettedImage := image.NewPaletted((*img).Bounds(), palette.Plan9)
 	// Draw the image into the paletted image.
 	draw.Draw(palettedImage, palettedImage.Bounds(), *img, (*img).Bounds().Min, draw.Src)
 	// Insert the paletted image into the gif.
-	gif.Image[0] = palettedImage
+	g.Image[0] = palettedImage
 	return nil
 }
 
@@ -113,15 +151,7 @@ func main() {
 	// Set the next update time to one second ago, so that the first update happens immediately.
 	nextUpdateTime := time.Now().Add(-time.Second)
 	// Somewhere to store the gif
-	var gif gif.GIF
-	// Initialise the gif's image buffer
-	gif.Image = make([]*image.Paletted, cfg.ImageFrameCount)
-	// Initialise the gif's delay buffer
-	gif.Delay = make([]int, cfg.ImageFrameCount)
-	// Initialise the delays to the desired delay
-	for i := range gif.Image {
-		gif.Delay[i] = int(cfg.ImageFrameDelay)
-	}
+	gif := initMyGIF(cfg.ImageFrameCount, cfg.ImageFrameDelay)
 
 	for {
 		// If the mastodon link is down, bring it back up.
@@ -143,8 +173,6 @@ func main() {
 
 		// Download the image.
 		var img image.Image
-		// TODO This needs to check the URL scheme and use the appropriate downloader.
-		// ftp://ftp.bom.gov.au/anon/gen/radar/IDR662.gif
 
 		switch cfg.ImageURLParsed.Scheme {
 		case "ftp":
@@ -154,7 +182,7 @@ func main() {
 		case "https":
 			err = downloadImageHTTP(cfg.ImageURLParsed, &img)
 		default:
-			slog.Error("Unrecognised scheme: " + cfg.ImageURLParsed.Scheme)
+			slog.Error("Unrecognised URL scheme: " + cfg.ImageURLParsed.Scheme)
 			os.Exit(1)
 		}
 
@@ -163,14 +191,20 @@ func main() {
 			continue
 		}
 		// Prepend the image to the gif.
-		err = prependImageToGif(&img, &gif)
+		err = gif.prependImage(&img)
 		if err != nil {
 			slog.Error(err.Error())
 			continue
 		}
 
-		// Write the gif to disk to test
-		err = writeImageToFile(gif.Image[0], "test.png")
+		// Write a single frame  to disk to test
+		// err = gif.writeFirstFrameToFile("test.gif")
+		// if err != nil {
+		// 	slog.Error(err.Error())
+		// 	continue
+		// }
+		// Write a single frame  to disk to test
+		err = gif.writeToFile("test.gif")
 		if err != nil {
 			slog.Error(err.Error())
 			continue
