@@ -14,15 +14,17 @@ type myGIF struct {
 	frameDelay    int64
 	frameCount    int64
 	maxFrameCount int64
+	minDuration   int64
 }
 
-func initMyGIF(maxFrameCount int64, frameDelay int64) *myGIF {
+func initMyGIF(maxFrameCount int64, frameDelay int64, minDuration int64) *myGIF {
 	g := myGIF{}
 	g.Image = make([]*image.Paletted, 0)
 	g.Delay = make([]int, 0)
 	g.frameCount = 0
 	g.frameDelay = frameDelay
 	g.maxFrameCount = maxFrameCount
+	g.minDuration = minDuration
 	return &g
 }
 
@@ -62,11 +64,24 @@ func (g *myGIF) prependImage(img *image.Image) error {
 		g.Image = append(g.Image, nil)
 		g.Delay = append(g.Delay, int(g.frameDelay))
 	}
+
 	// Shift all the frames down one.
 	for i := len(g.Image) - 1; i > 0; i-- {
 		g.Image[i] = g.Image[i-1]
-		g.Delay[i] = g.Delay[i-1]
 	}
+
+	var delay int
+	if g.frameDelay*g.frameCount < g.minDuration*100 {
+		delay = int((float64(g.minDuration) / float64(g.frameCount))) * 100
+	} else {
+		delay = int(g.frameDelay)
+	}
+
+	// Set the delay for the frames.
+	for i := 0; i < len(g.Image); i++ {
+		g.Delay[i] = delay
+	}
+
 	// Palettise the image.Image into a image.Paletted
 	palettedImage := image.NewPaletted((*img).Bounds(), palette.Plan9)
 	// Draw the image into the paletted image.

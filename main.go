@@ -26,7 +26,8 @@ type config struct {
 	ImageURLParsed       *url.URL
 	ImageUpdateInterval  int64 `env:"IMAGE_UPDATE_INTERVAL" envDefault:"300"`
 	ImageFrameCount      int64 `env:"IMAGE_FRAME_COUNT" envDefault:"10"`
-	ImageFrameDelay      int64 `env:"IMAGE_FRAME_DELAY" envDefault:"1"`
+	ImageFrameDelay      int64 `env:"IMAGE_FRAME_DELAY" envDefault:"10"`
+	ImageMinDuration     int64 `env:"IMAGE_MINIMUM_DURATION" envDefault:"1"`
 }
 
 // This function downloads the image at the provided http/s URL into the provided image.Image pointer.
@@ -89,7 +90,7 @@ func main() {
 	// Set the next update time to one second ago, so that the first update happens immediately.
 	nextUpdateTime := time.Now().Add(-time.Second)
 	// Somewhere to store the gif
-	gif := initMyGIF(cfg.ImageFrameCount, cfg.ImageFrameDelay)
+	gif := initMyGIF(cfg.ImageFrameCount, cfg.ImageFrameDelay, cfg.ImageMinDuration)
 
 	for {
 		// If the mastodon link is down, bring it back up.
@@ -136,6 +137,15 @@ func main() {
 			slog.Error(err.Error())
 			continue
 		}
+
+		// slog.Info("Got a frame")
+		// // Write the first frame to disk
+		// err = gif.writeToFile("firstframe.gif")
+		// if err != nil {
+		// 	slog.Error(err.Error())
+		// 	continue
+		// }
+		// continue
 
 		// Write the gif to a buffer
 		err = gif.writeToWriter(bufio.NewWriter(&b))

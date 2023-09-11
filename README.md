@@ -17,7 +17,7 @@ The bring-up process is pretty trivial:
     3. `flyctl auth signup`
     4. Set the config in the `env` section of `fly.toml`
     5. Set all the secrets listed in secrets.toml.template
-        `flyctl secrets set MASTODON_CLIENT_ID=<your client id> MASTODON_CLIENT_SECRET=<your client secret>`
+        `flyctl secrets set MASTODON_CLIENT_ID=<your client id> MASTODON_CLIENT_SECRET=<your client secret>`, etc
     6. `flyctl deploy`
 
 To pause the app, run `flyctl scale count 0`. To resume, run `flyctl deploy`.
@@ -34,4 +34,5 @@ To pause the app, run `flyctl scale count 0`. To resume, run `flyctl deploy`.
 | `IMAGE_URL` | The image to regularly download and append to the gif. Can be http/s or ftp | No | `https://example.com/image.png` | N/A |
 | `IMAGE_UPDATE_INTERVAL` | The interval in seconds between downloading the image | No | `300` | `300` |
 | `IMAGE_FRAME_COUNT` | The number of frames to keep in the gif | No | `10` | `10` |
-| `IMAGE_FRAME_DELAY` | The delay between frames in the gif, in 100ths of a second | No | `1` | `1` |
+| `IMAGE_FRAME_DELAY` | The delay between frames in the gif, in 100ths of a second | No | `10` | `10` |
+| `IMAGE_MINIMUM_DURATION` | The minimum duration of an animation in seconds. Increases the frame delay to avoid jittery images with low frame counts. | No | `1` | `1` |
