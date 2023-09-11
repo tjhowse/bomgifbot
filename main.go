@@ -78,6 +78,7 @@ func main() {
 	// Parse the image URL
 	var err error
 	var m *Mastodon
+	var b bytes.Buffer
 
 	cfg.ImageURLParsed, err = url.Parse(cfg.ImageURL)
 	if err != nil {
@@ -125,6 +126,7 @@ func main() {
 
 		if err != nil {
 			slog.Error("Failed to download and parse image: " + err.Error())
+			time.Sleep(10 * time.Second)
 			continue
 		}
 
@@ -135,17 +137,19 @@ func main() {
 			continue
 		}
 
-		// Copy the image to a buffer
-		var b bytes.Buffer
-		writer := bufio.NewWriter(&b)
-		err = gif.writeToWriter(writer)
+		// Write the gif to a buffer
+		err = gif.writeToWriter(bufio.NewWriter(&b))
 		if err != nil {
 			slog.Error(err.Error())
 			continue
 		}
-		reader := bytes.NewReader(b.Bytes())
 
 		// Post the gif to mastodon
-		m.PostStatusWithImageFromReader("A gif, just for you.", reader)
+		err = m.PostStatusWithImageFromReader("A gif, just for you.", bytes.NewReader(b.Bytes()))
+		if err != nil {
+			slog.Error(err.Error())
+			m = nil
+		}
+		b.Reset()
 	}
 }
