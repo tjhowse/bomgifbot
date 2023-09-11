@@ -12,4 +12,4 @@ primary_region = "syd"
 
 [env]
   MASTODON_SERVER = "https://howse.social"
-  GIF_URL = "http://www.bom.gov.au/radar/IDR662.gif"
+  IMAGE_URL = "ftp://ftp.bom.gov.au/anon/gen/radar/IDR662.gif"
