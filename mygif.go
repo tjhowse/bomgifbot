@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"image"
 	"image/color/palette"
 	"image/draw"
@@ -46,6 +47,11 @@ func (g *myGIF) writeToFile(filename string) error {
 	}
 	defer f.Close()
 	return gif.EncodeAll(f, &g.GIF)
+}
+
+// This function writes the animated gif to a writer
+func (g *myGIF) writeToWriter(w *bufio.Writer) error {
+	return gif.EncodeAll(w, &g.GIF)
 }
 
 // This inserts the provide image into the first frame of the gif,

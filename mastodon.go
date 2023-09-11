@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 
 	"github.com/mattn/go-mastodon"
@@ -44,14 +45,22 @@ func (m *Mastodon) GetMyStatuses(n int64) ([]*mastodon.Status, error) {
 	}
 }
 
-// Uploads an image to the server and returns an attachment pointer
-func (m *Mastodon) UploadImage(filename string) (*mastodon.Attachment, error) {
-	return m.c.UploadMedia(context.Background(), filename)
+// Posts a status with an image attached
+func (m *Mastodon) PostStatusWithImage(status string, filename string) error {
+	a, err := m.c.UploadMedia(context.Background(), filename)
+	if err != nil {
+		return err
+	}
+	_, err = m.c.PostStatus(context.Background(), &mastodon.Toot{
+		Status:   status,
+		MediaIDs: []mastodon.ID{a.ID},
+	})
+	return err
 }
 
 // Posts a status with an image attached
-func (m *Mastodon) PostStatusWithImage(status string, filename string) error {
-	a, err := m.UploadImage(filename)
+func (m *Mastodon) PostStatusWithImageFromReader(status string, file io.Reader) error {
+	a, err := m.c.UploadMediaFromReader(context.Background(), file)
 	if err != nil {
 		return err
 	}

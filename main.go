@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"image"
 	"image/gif"
@@ -133,12 +135,17 @@ func main() {
 			continue
 		}
 
-		// Write to disk to test
-		err = gif.writeToFile("test.gif")
+		// Copy the image to a buffer
+		var b bytes.Buffer
+		writer := bufio.NewWriter(&b)
+		err = gif.writeToWriter(writer)
 		if err != nil {
 			slog.Error(err.Error())
 			continue
 		}
-		m.PostStatusWithImage("test", "test.gif")
+		reader := bytes.NewReader(b.Bytes())
+
+		// Post the gif to mastodon
+		m.PostStatusWithImageFromReader("test", reader)
 	}
 }
