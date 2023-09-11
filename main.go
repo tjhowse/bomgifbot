@@ -146,6 +146,6 @@ func main() {
 		reader := bytes.NewReader(b.Bytes())
 
 		// Post the gif to mastodon
-		m.PostStatusWithImageFromReader("test", reader)
+		m.PostStatusWithImageFromReader("A gif, just for you.", reader)
 	}
 }
