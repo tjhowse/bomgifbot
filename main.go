@@ -125,6 +125,7 @@ func main() {
 			slog.Error("Failed to download and parse image: " + err.Error())
 			continue
 		}
+
 		// Prepend the image to the gif.
 		err = gif.prependImage(&img)
 		if err != nil {
@@ -132,22 +133,12 @@ func main() {
 			continue
 		}
 
-		// Write a single frame  to disk to test
-		// err = gif.writeFirstFrameToFile("test.gif")
-		// if err != nil {
-		// 	slog.Error(err.Error())
-		// 	continue
-		// }
-		// Write a single frame  to disk to test
+		// Write to disk to test
 		err = gif.writeToFile("test.gif")
 		if err != nil {
 			slog.Error(err.Error())
 			continue
 		}
-
-		// Upload the gif
-		// Compose a toot with the gif attached (?)
-		// Post the toot
-
+		m.PostStatusWithImage("test", "test.gif")
 	}
 }
