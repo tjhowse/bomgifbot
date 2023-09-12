@@ -80,7 +80,7 @@ func (g *myGIF) insertImage(img *image.Image, pos FramePosition) error {
 		}
 	} else {
 		if cycle_frames {
-			for i := 0; i < len(g.Image)-2; i++ {
+			for i := 0; i < len(g.Image)-1; i++ {
 				g.Image[i] = g.Image[i+1]
 			}
 		}
