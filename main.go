@@ -28,6 +28,7 @@ type config struct {
 	ImageFrameCount      int64 `env:"IMAGE_FRAME_COUNT" envDefault:"10"`
 	ImageFrameDelay      int64 `env:"IMAGE_FRAME_DELAY" envDefault:"10"`
 	ImageMinDuration     int64 `env:"IMAGE_MINIMUM_DURATION" envDefault:"1"`
+	TestMode             bool  `env:"TEST_MODE" envDefault:"false"`
 }
 
 // This function downloads the image at the provided http/s URL into the provided image.Image pointer.
@@ -94,7 +95,7 @@ func main() {
 
 	for {
 		// If the mastodon link is down, bring it back up.
-		if m == nil {
+		if m == nil && !cfg.TestMode {
 			m, err = NewMastodon(cfg.MastodonURL, cfg.MastodonClientID, cfg.MastodonClientSecret)
 			if err != nil {
 				slog.Error("Failed to connect to mastodon: " + err.Error())
@@ -131,21 +132,23 @@ func main() {
 			continue
 		}
 
-		// Prepend the image to the gif.
-		err = gif.prependImage(&img)
+		// Append the image to the gif.
+		err = gif.insertImage(&img, End)
 		if err != nil {
 			slog.Error(err.Error())
 			continue
 		}
 
-		// slog.Info("Got a frame")
-		// // Write the first frame to disk
-		// err = gif.writeToFile("firstframe.gif")
-		// if err != nil {
-		// 	slog.Error(err.Error())
-		// 	continue
-		// }
-		// continue
+		if cfg.TestMode {
+			// Write the gif to disk
+			err = gif.writeToFile("test.gif")
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+			slog.Info("Wrote test.gif")
+			continue
+		}
 
 		// Write the gif to a buffer
 		err = gif.writeToWriter(bufio.NewWriter(&b))

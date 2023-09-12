@@ -17,6 +17,13 @@ type myGIF struct {
 	minDuration   int64
 }
 
+type FramePosition bool
+
+const (
+	Start FramePosition = true
+	End   FramePosition = false
+)
+
 func initMyGIF(maxFrameCount int64, frameDelay int64, minDuration int64) *myGIF {
 	g := myGIF{}
 	g.Image = make([]*image.Paletted, 0)
@@ -56,18 +63,23 @@ func (g *myGIF) writeToWriter(w *bufio.Writer) error {
 	return gif.EncodeAll(w, &g.GIF)
 }
 
-// This inserts the provide image into the first frame of the gif,
-// and shifts all the other frames down one.
-func (g *myGIF) prependImage(img *image.Image) error {
+// This inserts an image at the start or end of the gif.
+func (g *myGIF) insertImage(img *image.Image, pos FramePosition) error {
 	if g.frameCount < g.maxFrameCount {
 		g.frameCount++
 		g.Image = append(g.Image, nil)
 		g.Delay = append(g.Delay, int(g.frameDelay))
 	}
 
-	// Shift all the frames down one.
-	for i := len(g.Image) - 1; i > 0; i-- {
-		g.Image[i] = g.Image[i-1]
+	// Shift all the frames across one.
+	if pos == Start {
+		for i := len(g.Image) - 1; i > 0; i-- {
+			g.Image[i] = g.Image[i-1]
+		}
+	} else {
+		for i := 0; i < len(g.Image)-2; i++ {
+			g.Image[i] = g.Image[i+1]
+		}
 	}
 
 	var delay int
@@ -87,6 +99,10 @@ func (g *myGIF) prependImage(img *image.Image) error {
 	// Draw the image into the paletted image.
 	draw.Draw(palettedImage, palettedImage.Bounds(), *img, (*img).Bounds().Min, draw.Src)
 	// Insert the paletted image into the gif.
-	g.Image[0] = palettedImage
+	if pos == Start {
+		g.Image[0] = palettedImage
+	} else {
+		g.Image[len(g.Image)-1] = palettedImage
+	}
 	return nil
 }
