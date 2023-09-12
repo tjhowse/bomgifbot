@@ -65,10 +65,12 @@ func (g *myGIF) writeToWriter(w *bufio.Writer) error {
 
 // This inserts an image at the start or end of the gif.
 func (g *myGIF) insertImage(img *image.Image, pos FramePosition) error {
+	cycle_frames := true
 	if g.frameCount < g.maxFrameCount {
 		g.frameCount++
 		g.Image = append(g.Image, nil)
 		g.Delay = append(g.Delay, int(g.frameDelay))
+		cycle_frames = false
 	}
 
 	// Shift all the frames across one.
@@ -77,7 +79,7 @@ func (g *myGIF) insertImage(img *image.Image, pos FramePosition) error {
 			g.Image[i] = g.Image[i-1]
 		}
 	} else {
-		if len(g.Image) == int(g.maxFrameCount) {
+		if cycle_frames {
 			for i := 0; i < len(g.Image)-2; i++ {
 				g.Image[i] = g.Image[i+1]
 			}

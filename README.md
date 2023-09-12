@@ -36,3 +36,4 @@ To pause the app, run `flyctl scale count 0`. To resume, run `flyctl deploy`.
 | `IMAGE_FRAME_COUNT` | The number of frames to keep in the gif | No | `10` | `10` |
 | `IMAGE_FRAME_DELAY` | The delay between frames in the gif, in 100ths of a second | No | `10` | `10` |
 | `IMAGE_MINIMUM_DURATION` | The minimum duration of an animation in seconds. Increases the frame delay to avoid jittery images with low frame counts. | No | `1` | `1` |
+| `TEST_MODE` | Controls whether the gif is posted to mastodon | No | `false` | `false` |
