@@ -59,14 +59,15 @@ func (m *Mastodon) PostStatusWithImage(status string, filename string) error {
 }
 
 // Posts a status with an image attached
-func (m *Mastodon) PostStatusWithImageFromReader(status string, file io.Reader) error {
+func (m *Mastodon) PostStatusWithImageFromReader(status string, file io.Reader, visibility string) error {
 	a, err := m.c.UploadMediaFromReader(context.Background(), file)
 	if err != nil {
 		return err
 	}
 	_, err = m.c.PostStatus(context.Background(), &mastodon.Toot{
-		Status:   status,
-		MediaIDs: []mastodon.ID{a.ID},
+		Status:     status,
+		MediaIDs:   []mastodon.ID{a.ID},
+		Visibility: visibility,
 	})
 	return err
 }
