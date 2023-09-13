@@ -31,9 +31,10 @@ To pause the app, run `flyctl scale count 0`. To resume, run `flyctl deploy`.
 | `MASTODON_CLIENT_SECRET` | The client secret of the mastodon app to use | Yes | `1234567890` | N/A |
 | `MASTODON_USER_EMAIL` | The email address of the mastodon account | Yes | `woo@you.com` | N/A |
 | `MASTODON_USER_PASSWORD` | The user password of the mastodon account | Yes | `1234567890` | N/A |
+| `MASTODON_TOOT_INTERVAL` | The number of seconds between posts on mastodon | No | `1800` | N/A |
 | `IMAGE_URL` | The image to regularly download and append to the gif. Can be http/s or ftp | No | `https://example.com/image.png` | N/A |
 | `IMAGE_UPDATE_INTERVAL` | The interval in seconds between downloading the image | No | `300` | `300` |
-| `IMAGE_FRAME_COUNT` | The number of frames to keep in the gif | No | `10` | `10` |
-| `IMAGE_FRAME_DELAY` | The delay between frames in the gif, in 100ths of a second | No | `10` | `10` |
+| `IMAGE_FRAME_COUNT` | The number of frames to keep in the gif | No | `12` | `12` |
+| `IMAGE_FRAME_DELAY` | The delay between frames in the gif, in 100ths of a second | No | `50` | `50` |
 | `IMAGE_MINIMUM_DURATION` | The minimum duration of an animation in seconds. Increases the frame delay to avoid jittery images with low frame counts. | No | `1` | `1` |
-| `TEST_MODE` | Controls whether the gif is posted to mastodon | No | `false` | `false` |
+| `TEST_MODE` | Controls whether the gif is written to disk rather than being posted to mastodon | No | `false` | `false` |

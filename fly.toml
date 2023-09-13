@@ -12,8 +12,9 @@ primary_region = "syd"
 
 [env]
   MASTODON_SERVER = "https://howse.social"
+  MASTODON_TOOT_INTERVAL = "1800"
   IMAGE_URL = "ftp://ftp.bom.gov.au/anon/gen/radar/IDR662.gif"
-  IMAGE_UPDATE_INTERVAL = "1800"
+  IMAGE_UPDATE_INTERVAL = "300"
   IMAGE_FRAME_COUNT = "12"
   IMAGE_FRAME_DELAY = "50"
   IMAGE_MINIMUM_DURATION = "1"
