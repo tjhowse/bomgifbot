@@ -70,7 +70,7 @@ func sqDiffUInt8(x, y uint8) uint64 {
 // This function creates a mygif and appends five images to it then writes to disk
 func TestImageGeneration(t *testing.T) {
 	img := getTestImage("hi")
-	writeGifToFile(&img, "TestImageGeneration.gif")
+	writeGifToFile(&img, t.TempDir()+"/TestImageGeneration.gif")
 }
 func TestAppend(t *testing.T) {
 	const frameCount = 10
