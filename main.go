@@ -162,7 +162,7 @@ func main() {
 			}
 
 			// Post the gif to mastodon
-			err = m.PostStatusWithImageFromReader("A gif, just for you.", bytes.NewReader(b.Bytes()))
+			err = m.PostStatusWithImageFromReader("A gif, just for you, #brisbane", bytes.NewReader(b.Bytes()))
 			if err != nil {
 				slog.Error(err.Error())
 				m = nil
