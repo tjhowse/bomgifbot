@@ -127,6 +127,7 @@ func main() {
 				slog.Error(err.Error())
 				continue
 			}
+			slog.Info("Downloaded new image.")
 
 			if cfg.TestMode {
 				// Write the gif to disk
@@ -156,6 +157,7 @@ func main() {
 					time.Sleep(10 * time.Second)
 					continue
 				}
+				slog.Info("Connected to mastodon.")
 			}
 
 			// Write the gif to a buffer
@@ -171,6 +173,7 @@ func main() {
 				slog.Error(err.Error())
 				m = nil
 			}
+			slog.Info("Tooted new gif.")
 			b.Reset()
 		}
 
