@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mattn/go-mastodon"
+	"github.com/tjhowse/go-mastodon"
 )
 
 type Mastodon struct {
