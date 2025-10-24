@@ -1,6 +1,6 @@
 module github.com/tjhowse/bomgifbot
 
-go 1.21.0
+go 1.25.3
 
 require (
 	github.com/caarlos0/env/v9 v9.0.0 // indirect

@@ -23,7 +23,7 @@ type config struct {
 	MastodonUserEmail    string `env:"MASTODON_USER_EMAIL"`
 	MastodonUserPassword string `env:"MASTODON_USER_PASSWORD"`
 	MastodonTootInterval int64  `env:"MASTODON_TOOT_INTERVAL" envDefault:"1800"`
-	ImageURL             string `env:"IMAGE_URL"`
+	ImageURL             string `env:"IMAGE_URL" envDefault:"ftp://ftp.bom.gov.au/anon/gen/radar/IDR662.gif"`
 	ImageURLParsed       *url.URL
 	ImageUpdateInterval  int64 `env:"IMAGE_UPDATE_INTERVAL" envDefault:"300"`
 	ImageFrameCount      int64 `env:"IMAGE_FRAME_COUNT" envDefault:"12"`
@@ -143,6 +143,10 @@ func main() {
 		if time.Now().After(nextTootTime) {
 			// Calculate the next toot time.
 			nextTootTime = nextTootTime.Add(time.Duration(cfg.MastodonTootInterval) * time.Second)
+
+			if cfg.TestMode {
+				continue
+			}
 
 			// If the mastodon link is down, bring it back up.
 			if m == nil && !cfg.TestMode {
