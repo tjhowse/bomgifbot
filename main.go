@@ -20,8 +20,7 @@ type config struct {
 	MastodonURL          string `env:"MASTODON_SERVER"`
 	MastodonClientID     string `env:"MASTODON_CLIENT_ID"`
 	MastodonClientSecret string `env:"MASTODON_CLIENT_SECRET"`
-	MastodonUserEmail    string `env:"MASTODON_USER_EMAIL"`
-	MastodonUserPassword string `env:"MASTODON_USER_PASSWORD"`
+	MastodonAccessToken  string `env:"MASTODON_ACCESS_TOKEN"`
 	MastodonTootInterval int64  `env:"MASTODON_TOOT_INTERVAL" envDefault:"1800"`
 	ImageURL             string `env:"IMAGE_URL" envDefault:"ftp://ftp.bom.gov.au/anon/gen/radar/IDR662.gif"`
 	ImageURLParsed       *url.URL
@@ -151,7 +150,7 @@ func main() {
 
 			// If the mastodon link is down, bring it back up.
 			if m == nil && !cfg.TestMode {
-				m, err = NewMastodon(cfg.MastodonURL, cfg.MastodonClientID, cfg.MastodonClientSecret)
+				m, err = NewMastodon(cfg.MastodonURL, cfg.MastodonClientID, cfg.MastodonClientSecret, cfg.MastodonAccessToken)
 				if err != nil {
 					slog.Error("Failed to connect to mastodon: " + err.Error())
 					time.Sleep(10 * time.Second)
@@ -167,13 +166,19 @@ func main() {
 				continue
 			}
 
+			if b.Len() == 0 {
+				slog.Error("Image length is zero, skipping toot.")
+				continue
+			}
+
 			// Post the gif to mastodon
-			err = m.PostStatusWithImageFromReader("A gif, just for you, #brisbaneweather", bytes.NewReader(b.Bytes()), "unlisted")
+			err = m.PostStatusWithImageFromBytes("A gif, just for you, #brisbaneweather", b.Bytes(), "unlisted")
 			if err != nil {
 				slog.Error(err.Error())
 				m = nil
+			} else {
+				slog.Info("Tooted new gif.")
 			}
-			slog.Info("Tooted new gif.")
 			b.Reset()
 		}
 

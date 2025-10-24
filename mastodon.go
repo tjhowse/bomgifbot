@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"io"
-	"os"
+	"fmt"
+	"time"
 
 	"github.com/mattn/go-mastodon"
 )
@@ -12,17 +12,14 @@ type Mastodon struct {
 	c *mastodon.Client
 }
 
-func NewMastodon(server, id, secret string) (*Mastodon, error) {
+func NewMastodon(server, id, secret, access_token string) (*Mastodon, error) {
 	m := &Mastodon{}
 	m.c = mastodon.NewClient(&mastodon.Config{
 		Server:       server,
 		ClientID:     id,
 		ClientSecret: secret,
+		AccessToken:  access_token,
 	})
-	err := m.c.Authenticate(context.Background(), os.Getenv("MASTODON_USER_EMAIL"), os.Getenv("MASTODON_USER_PASSWORD"))
-	if err != nil {
-		return nil, err
-	}
 	return m, nil
 }
 
@@ -59,11 +56,19 @@ func (m *Mastodon) PostStatusWithImage(status string, filename string) error {
 }
 
 // Posts a status with an image attached
-func (m *Mastodon) PostStatusWithImageFromReader(status string, file io.Reader, visibility string) error {
-	a, err := m.c.UploadMediaFromReader(context.Background(), file)
+func (m *Mastodon) PostStatusWithImageFromBytes(status string, file []byte, visibility string) error {
+	fmt.Println("Posting status with image...")
+	a, err := m.c.UploadMediaFromBytes(context.Background(), file)
 	if err != nil {
 		return err
 	}
+	// Wait until the upload has been processed before posting the status.
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) && (m.c.GetMediaStatus(context.Background(), a) != nil) {
+		fmt.Println("Waiting for media to be processed...")
+		time.Sleep(500 * time.Millisecond)
+	}
+
 	_, err = m.c.PostStatus(context.Background(), &mastodon.Toot{
 		Status:     status,
 		MediaIDs:   []mastodon.ID{a.ID},
